@@ -5,16 +5,26 @@ const fs = require('fs')
 const bodyParser = require('body-parser')
 
 const app = express()
-app.use(bodyParser.json())
+app.use(bodyParser())
 const port = 3000
 const way = './src/newDATA.json'
 
 let datas = null;
 
-fs.readFile(way, function (err, data) {
-    if (err) throw err;
-    datas = data
-  });
+function readJSONFile(filename, callback) {
+    fs.readFile(filename, function (err, data) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      try {
+        callback(null, JSON.parse(data));
+      } catch(exception) {
+        callback(exception);
+      }
+    });
+  }
+
 
 
 
@@ -29,6 +39,10 @@ app.get('/getAllData', (request, response) => {
     response.type('application/json')
     response.header('Access-Control-Allow-Origin', '*')
     response.header('Access-Control-Allow-Headers', 'origin, content-type, accept')
+    readJSONFile(way, function (err, data) {
+        if (err) throw err;
+        datas = data
+      });
     console.log('datas', datas)
     response.send(datas)
     response.end()
@@ -40,7 +54,7 @@ app.post('/updateAllData', (request, response) => {
         response.header('Access-Control-Allow-Origin', '*')
         response.header('Access-Control-Allow-Headers', 'origin, content-type, accept')
         response.send('have request')
-        response.end(saveResponse(JSON.stringify(request.body)))
+        response.end(console.log(JSON.stringify(request.body)))
     }
 })
 
