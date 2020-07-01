@@ -1,5 +1,3 @@
-// const datas = require('./src/data.json')
-// const datas = require('./src/newDATA.json')
 const express = require('express')
 const fs = require('fs')
 const bodyParser = require('body-parser')
@@ -10,6 +8,10 @@ const port = 3000
 const way = './src/newDATA.json'
 
 let datas = null;
+
+//TODO 
+//1. добавить в роутах проверку try/catch
+//2. решить проблему со считыванием файла - первое обращение = {datas:null}, второе обращение {datas:haveData}
 
 function readJSONFile(filename, callback) {
     fs.readFile(filename, function (err, data) {
@@ -25,9 +27,6 @@ function readJSONFile(filename, callback) {
     });
   }
 
-
-
-
 function saveResponse (data){ fs.writeFile(way, data, function(error){
 
     if(error) throw error;
@@ -35,17 +34,19 @@ function saveResponse (data){ fs.writeFile(way, data, function(error){
 })};
 
 
-app.get('/getAllData', (request, response) => {
-    response.type('application/json')
-    response.header('Access-Control-Allow-Origin', '*')
-    response.header('Access-Control-Allow-Headers', 'origin, content-type, accept')
+app.get('/getAllData', async (request, response) => {
+    
     readJSONFile(way, function (err, data) {
         if (err) throw err;
         datas = data
       });
+
+    response.type('application/json')
+    response.header('Access-Control-Allow-Origin', '*')
+    response.header('Access-Control-Allow-Headers', 'origin, content-type, accept')
     console.log('datas', datas)
-    response.send(datas)
-    response.end()
+        response.send(datas)
+        response.end()
 })
 
 app.post('/updateAllData', (request, response) => {
@@ -53,8 +54,8 @@ app.post('/updateAllData', (request, response) => {
     if(request){
         response.header('Access-Control-Allow-Origin', '*')
         response.header('Access-Control-Allow-Headers', 'origin, content-type, accept')
-        response.send('have request')
-        response.end(console.log(JSON.stringify(request.body)))
+        response.send('have data')
+        response.end(saveResponse(JSON.stringify(request.body.data)))
     }
 })
 
