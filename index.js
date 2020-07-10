@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 app.use(bodyParser());
-const port = "https://hotdogs-server.herokuapp.com";
+const port = process.env.DOMAIN || 3000;
 const way = "./src/newDATA.json";
 
 let datas = null;
