@@ -1,19 +1,10 @@
 const express = require("express");
 const fs = require("fs");
-const bodyParser = require("body-parser");
 
 const app = express();
-app.use(bodyParser());
 const port = process.env.PORT || 3000;
-const way = "./src/newDATA.json";
-
-let datas = null;
 
 const products_model = require("./src/products_model");
-
-//TODO
-//1. добавить в роутах проверку try/catch
-//2. решить проблему со считыванием файла - первое обращение = {datas:null}, второе обращение {datas:haveData}
 
 function readJSONFile(filename, callback) {
   fs.readFile(filename, function (err, data) {
@@ -36,45 +27,33 @@ function saveResponse(data) {
   });
 }
 
-app.get("/", async (request, response) => {
+app.use(express.json());
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Access-Control-Allow-Headers"
+  );
+  next();
+});
+
+// app.get("/", async (req, res) => {
+
+// });
+
+app.get("/getAllData", async (req, res) => {
   products_model
     .getProducts()
     .then((response) => {
-      response.status(200).send(response);
+      res.status(200).send(response);
     })
     .catch((error) => {
-      response.status(500).send(error);
+      res.status(500).send(error);
     });
 });
 
-app.get("/getAllData", async (request, response) => {
-  readJSONFile(way, function (err, data) {
-    if (err) throw err;
-    datas = data;
-  });
-
-  response.type("application/json");
-  response.header("Access-Control-Allow-Origin", "*");
-  response.header(
-    "Access-Control-Allow-Headers",
-    "origin, content-type, accept"
-  );
-  // console.log('datas', datas)
-  response.send(datas);
-  response.end();
-});
-
-app.post("/updateAllData", (request, response) => {
-  if (request) {
-    response.header("Access-Control-Allow-Origin", "*");
-    response.header(
-      "Access-Control-Allow-Headers",
-      "origin, content-type, accept"
-    );
-    response.send("have data");
-    response.end(saveResponse(JSON.stringify(request.body.data)));
-  }
-});
+app.post("/updateAllData", (req, res) => {});
 
 app.listen(port, (err) => {
   if (err) {

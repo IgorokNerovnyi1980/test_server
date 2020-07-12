@@ -15,16 +15,20 @@ const pool = new Pool({
   port: "5432",
 });
 
+const queries = {
+  allData:
+    "SELECT * FROM products LEFT JOIN product_img ON products.id=product_img.product_id",
+};
+
 const getProducts = () => {
   console.log("start request for db");
   return new Promise(function (resolve, reject) {
-    pool.query("SELECT * FROM products ORDER BY id ASC", (error, results) => {
+    pool.query(queries.allData, (error, results) => {
       if (error) {
         console.log("reject", error);
         reject(error);
       }
-      console.log("resolve");
-      resolve(results);
+      resolve(results.rows);
     });
   });
 };
