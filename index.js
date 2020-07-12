@@ -9,6 +9,8 @@ const way = "./src/newDATA.json";
 
 let datas = null;
 
+const products_model = require("./src/products_model");
+
 //TODO
 //1. добавить в роутах проверку try/catch
 //2. решить проблему со считыванием файла - первое обращение = {datas:null}, второе обращение {datas:haveData}
@@ -33,6 +35,17 @@ function saveResponse(data) {
     console.log("writed file is done");
   });
 }
+
+app.get("/", async (request, response) => {
+  products_model
+    .getProducts()
+    .then((response) => {
+      response.status(200).send(response);
+    })
+    .catch((error) => {
+      response.status(500).send(error);
+    });
+});
 
 app.get("/getAllData", async (request, response) => {
   readJSONFile(way, function (err, data) {
