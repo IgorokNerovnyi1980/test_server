@@ -16,29 +16,75 @@ const pool = new Pool({
 });
 
 const queries = {
-  allData:
+  getAllData:
     "SELECT * FROM products LEFT JOIN product_img ON products.id=product_img.product_id",
+  createNew:
+    "INSERT INTO products (label, description, price) VALUES ($1, $2, $3) RETURNING *",
+  update:
+    "UPDATE products SET label=$2, SET description=$3, set price=$4 WHERE id=$1",
+  delete: "DELETE FROM products WHERE id = $1",
+  addImg: "INSERT INTO product_img (url, product_id) VALUES ($1, $2)",
+  updateImg: "UPDATE product_img SET url=$2 WHERE id=$1",
+  deleteImg: '"DELETE FROM product_img WHERE product_id = $1",',
 };
 
 const getProducts = () => {
-  console.log("start request for db");
+  console.log("getProducts for db");
   return new Promise(function (resolve, reject) {
-    pool.query(queries.allData, (error, results) => {
+    pool.query(queries.getAllData, (error, results) => {
       if (error) {
-        console.log("reject", error);
+        console.log(" getProducts reject", error);
         reject(error);
       }
+      console.log(" getProducts resolve");
       resolve(results.rows);
     });
   });
 };
 
-const createProduct = (body) => {
+const addImgLink = (newUrl) => {
   return new Promise(function (resolve, reject) {
-    const { name, email } = body;
+    const data = getProducts();
+    console.log("test", data.length);
+    const id = data.length + 1;
+    pool.query(quries.addImg, [id, newUrl], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(`A new imgs link was added for product with id:${id}`);
+    });
+  });
+};
+
+const updateImgLink = (newUrl, productId) => {
+  return new Promise(function (resolve, reject) {
+    pool.query(quries.updateImg, [productId, newUrl], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(`A new imgs link was added for product with id:${productId}`);
+    });
+  });
+};
+
+const deleteImgLink = (productId) => {
+  return new Promise(function (resolve, reject) {
+    pool.query(quries.deleteImg, [productId], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(`A imgs link was deleted for product with id:${productId}`);
+    });
+  });
+};
+
+const createProduct = (body) => {
+  console.log("in create fn", body);
+  return new Promise(function (resolve, reject) {
+    const { label, description, price } = body;
     pool.query(
-      "INSERT INTO product (name, email) VALUES ($1, $2) RETURNING *",
-      [name, email],
+      quries.createNew,
+      [label, description, Number(price)],
       (error, results) => {
         if (error) {
           reject(error);
@@ -49,14 +95,37 @@ const createProduct = (body) => {
   });
 };
 
-const deleteProduct = () => {
+const updateProduct = (body) => {
   return new Promise(function (resolve, reject) {
-    const id = parseInt(request.params.id);
-    pool.query("DELETE FROM products WHERE id = $1", [id], (error, results) => {
+    const { id, label, description, price, url } = body;
+    pool.query(
+      quries.createNew,
+      [id, label, description, price],
+      (error, results) => {
+        if (error) {
+          reject(error);
+        }
+        updateImgLink(url, id);
+        resolve(`A product with id:${id} has been update`);
+      }
+    );
+  });
+};
+
+const deleteProduct = () => {
+  console.log("in delete fn");
+  return new Promise(function (resolve, reject) {
+    const id = Number(request.params.id);
+    console.log("in fn", id, typeof id);
+    pool.query(quries.delete, [Number(id)], (error, results) => {
+      console.log("pool");
       if (error) {
+        console.log("reject", error);
         reject(error);
       }
-      resolve(`Product deleted with ID: ${id}`);
+      console.log("resolve");
+      deleteImgLink(id);
+      resolve(`was deleted product with ID: ${id}`);
     });
   });
 };
@@ -64,5 +133,6 @@ const deleteProduct = () => {
 module.exports = {
   getProducts,
   createProduct,
+  updateProduct,
   deleteProduct,
 };
