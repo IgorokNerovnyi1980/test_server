@@ -17,15 +17,15 @@ const pool = new Pool({
 
 const queries = {
   getAllData:
-    "SELECT * FROM products LEFT JOIN product_img ON products.id=product_img.product_id",
+    "select * from products left join product_img on products.id=product_img.product_id",
   createNew:
-    "INSERT INTO products (label, description, price) VALUES ($1, $2, $3) RETURNING *",
+    "insert into products(label, description, price) values($1, $2, $3) returning *",
   update:
-    "UPDATE products SET label=$2, SET description=$3, set price=$4 WHERE id=$1",
-  delete: "DELETE FROM products WHERE id = $1",
-  addImg: "INSERT INTO product_img (url, product_id) VALUES ($1, $2)",
-  updateImg: "UPDATE product_img SET url=$2 WHERE id=$1",
-  deleteImg: '"DELETE FROM product_img WHERE product_id = $1",',
+    "update products SET label=$2, SET description=$3, set price=$4 WHERE id=$1",
+  delete: "delete from product_img where id =$1",
+  addImg: "insert into product_img(url,product_id) values($1, $2)",
+  updateImg: "update product_img SET url=$2 WHERE product_id=$1",
+  deleteImg: "delete from product_img where product_id = $1",
 };
 
 const getProducts = () => {
@@ -112,10 +112,10 @@ const updateProduct = (body) => {
   });
 };
 
-const deleteProduct = () => {
+const deleteProduct = (id) => {
   console.log("in delete fn");
   return new Promise(function (resolve, reject) {
-    const id = Number(request.params.id);
+    // const id = Number(request.params.id);
     console.log("in fn", id, typeof id);
     pool.query(quries.delete, [Number(id)], (error, results) => {
       console.log("pool");

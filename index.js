@@ -53,7 +53,7 @@ app.post("/update", (req, res) => {
 
 app.delete("/delete/:id", (req, res) => {
   products_model
-    .deleteProduct()
+    .deleteProduct(req.params.id)
     .then((response) => {
       res.status(200).send(response);
     })
