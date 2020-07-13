@@ -1,18 +1,11 @@
 const Pool = require("pg").Pool;
 
-// const pool = new Pool({
-//   user: process.env.USER,
-//   host: process.env.HOST,
-//   database: process.env.DB,
-//   password: process.env.PASSWORD,
-//   port: process.env.DB_PORT,
-// });
 const pool = new Pool({
-  user: "server",
-  host: "localhost",
-  database: "werdb",
-  password: "root",
-  port: "5432",
+  user: process.env.USER || "server",
+  host: process.env.HOST || "localhost",
+  database: process.env.DB || "werdb",
+  password: process.env.PASSWORD || "root",
+  port: process.env.DB_PORT || 5432,
 });
 
 const queries = {
